@@ -1,0 +1,664 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family:
+        "Space Grotesk",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Roboto",
+        "Oxygen",
+        "Ubuntu",
+        "Cantarell",
+        "Fira Sans",
+        "Droid Sans",
+        "Helvetica Neue",
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.min-h-screen {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1d1b31, #5c3a72);
+
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Main container */
+.bg-white\/10 {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+/* Typography */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Buttons */
+.button {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+}
+
+.mt-4 .button {
+    margin-right: 20px;
+}
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab buttons */
+.flex.w-full {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.flex.w-full .button {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.flex.w-full .button:hover,
+.flex.w-full .button.active {
+    background-color: #ffffff;
+    color: #2196f3;
+}
+
+/* Form inputs */
+
+/* Order type and exit strategy buttons */
+.flex.space-x-4 {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.flex.space-x-4 .button {
+    flex: 1;
+    color: #fff; /* Ensure text color is white */
+}
+
+.flex.space-x-4 .button.market {
+    background-color: #800000;
+}
+
+.flex.space-x-4 .button.market:hover {
+    background-color: #a52a2a;
+}
+
+.flex.space-x-4 .button.limit {
+    background-color: #4682b4;
+}
+
+.flex.space-x-4 .button.limit:hover {
+    background-color: #4169e1;
+}
+
+.flex.space-x-4 .button.EMA {
+    background-color: #800080;
+}
+
+.flex.space-x-4 .button.EMA:hover {
+    background-color: #9932cc;
+}
+
+.flex.space-x-4 .button.HMA {
+    background-color: #ffa500;
+}
+
+.flex.space-x-4 .button.HMA:hover {
+    background-color: #ff8c00;
+}
+
+/* Checkbox styling */
+.flex.items-center.space-x-2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.flex.items-center.space-x-2 input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.flex.items-center.space-x-2 .trailing {
+    color: #ff4500;
+}
+
+.flex.items-center.space-x-2 .static {
+    color: #1e90ff;
+}
+
+/* Place Order button */
+.button[type="submit"] {
+    width: 100%;
+    background: linear-gradient(135deg, #4caf50, #2196f3);
+    color: #ffffff;
+    font-size: 1.1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.button[type="submit"]:hover {
+    background: linear-gradient(135deg, #45a049, #1e88e5);
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+}
+
+.modal-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.modal-content .flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.modal-content input[type="checkbox"] {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.modal-content .button {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0000ff;
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+    width: 80%;
+    max-width: 600px;
+}
+
+.notification p {
+    margin: 0.5rem 0;
+}
+
+.notification .button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.notification .button.exit {
+    background-color: #ff4500;
+    color: #fff;
+}
+
+.notification .button.exit:hover {
+    background-color: #ff6347;
+}
+
+.notification .button.edit {
+    background-color: #32cd32;
+    color: #fff;
+}
+
+.notification .button.edit:hover {
+    background-color: #2e8b57;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .min-h-screen {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .button {
+        font-size: 0.9rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .notification {
+        width: 90%;
+    }
+}
+
+/* Animation for flying mascot */
+@keyframes fly {
+    0% {
+        transform: translateX(0) translateY(0);
+    }
+    25% {
+        transform: translateX(50px) translateY(-50px);
+    }
+    50% {
+        transform: translateX(100px) translateY(0);
+    }
+    75% {
+        transform: translateX(50px) translateY(50px);
+    }
+    100% {
+        transform: translateX(0) translateY(0);
+    }
+}
+
+.mascot {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 3rem;
+    animation: fly 5s infinite;
+}
+
+/* Updated button styles */
+.flex.space-x-4 .button {
+    flex: 1;
+    color: #fff; /* Ensure text color is white */
+    background-color: rgba(255, 255, 255, 0.2); /* Default background color */
+    transition:
+        background-color 0.3s ease,
+        opacity 0.3s ease;
+    opacity: 0.3; /* Dim default state */
+}
+
+.flex.space-x-4 .button.market {
+    background-color: #800000;
+}
+
+.flex.space-x-4 .button.market:hover,
+.flex.space-x-4 .button.market.active {
+    background-color: #a52a2a;
+    opacity: 1; /* Brighten active state */
+}
+
+.flex.space-x-4 .button.limit {
+    background-color: #4682b4;
+}
+
+.flex.space-x-4 .button.limit:hover,
+.flex.space-x-4 .button.limit.active {
+    background-color: #4169e1;
+    opacity: 1; /* Brighten active state */
+}
+
+.flex.space-x-4 .button.EMA {
+    background-color: #800080;
+}
+
+.flex.space-x-4 .button.EMA:hover,
+.flex.space-x-4 .button.EMA.active {
+    background-color: #9932cc;
+    opacity: 1; /* Brighten active state */
+}
+
+.flex.space-x-4 .button.HMA {
+    background-color: #ffa500;
+}
+
+.flex.space-x-4 .button.HMA:hover,
+.flex.space-x-4 .button.HMA.active {
+    background-color: #ff8c00;
+    opacity: 1; /* Brighten active state */
+}
+
+/* Styles for trade items */
+/* Styles for trade items */
+.trade-list {
+    overflow-y: auto;
+    margin-top: 20px;
+    padding-right: 10px;
+    /* Set max-height to the height of the screen */
+    max-height: 60vh;
+}
+
+
+.trade-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.trade-item:hover {
+    transform: translateY(-5px);
+}
+
+.trade-item .stock {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.trade-item .profit {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.trade-item p {
+    margin: 5px 0;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+.text-md {
+    font-size: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.font-extrabold {
+    font-weight: 800;
+}
+
+.bg-opacity-50 {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.hover\:text-gray-500:hover {
+    color: #6b7280;
+}
+
+.text-gray-300 {
+    color: #d1d5db;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+}
+
+.text-3xl {
+    font-size: 2rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.notification-popup {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+}
+
+.notification-popup .text-center {
+    text-align: center;
+}
+
+.notification-popup .flex.justify-center {
+    justify-content: center;
+}
+
+.notification-popup .space-x-4 > *:not(:last-child) {
+    margin-right: 1rem;
+}
+
+.input-field {
+    width: calc(100% - 25px); /* Adjust width to be 25px shorter */
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1rem;
+    margin-right: 25px; /* Add right margin */
+}
+
+/* Specific styles for buttons */
+.button.EMA {
+    background-color: #800080; /* Purple for EMA */
+}
+
+.button.EMA.active {
+    background-color: #9932cc;
+}
+
+.button.HMA {
+    background-color: #ffa500; /* Orange for HMA */
+}
+
+.button.HMA.active {
+    background-color: #ff8c00;
+}
+
+.flex.items-center.space-x-2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Adjust spacing as needed */
+    margin-bottom: 1rem;
+}
+
+.flex.items-center.space-x-2 .button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Main container */
+.bg-white\/10 {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+/* Form inputs */
+.input-field {
+    width: calc(100% - 25px); /* Adjust width to be 25px shorter */
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1rem;
+    margin-right: 25px; /* Add right margin */
+}
+
+/* Specific styles for buttons */
+.button.EMA {
+    background-color: #800080; /* Purple for EMA */
+}
+
+.button.EMA.active {
+    background-color: #9932cc;
+}
+
+.button.HMA {
+    background-color: #ffa500; /* Orange for HMA */
+}
+
+.button.HMA.active {
+    background-color: #ff8c00;
+}
+
+/* Flex container for buttons */
+.flex.items-center.space-x-2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Adjust spacing as needed */
+    margin-bottom: 1rem;
+}
+
+.flex.items-center.space-x-2 .button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Add this to styles.css */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.75);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: #d4d4d4;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+}
+
+.close-button {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+}
+
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.75);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
