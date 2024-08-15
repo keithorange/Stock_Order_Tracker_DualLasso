@@ -40,12 +40,10 @@ def get_curr_ma(ohlcv, ma_type, period):
     return ohlcv['MA'].iloc[-1]
 
 class OrderMonitor:
-    def __init__(self, order_manager: OrderManager, check_exit_interval, price_update_interval, auto_remove_on_exit=False):
+    def __init__(self, order_manager: OrderManager, price_update_interval, auto_remove_on_exit=False):
         self.order_manager = order_manager
-        self.check_exit_interval = check_exit_interval
         self.price_update_interval = price_update_interval
         self.auto_remove_on_exit = auto_remove_on_exit
-        self.thread = threading.Thread(target=self.run, daemon=True)
         self.price_update_thread = threading.Thread(target=self.update_prices_continuously, daemon=True)
         self.running = False
         logging.basicConfig(level=logging.INFO)
@@ -53,21 +51,15 @@ class OrderMonitor:
     def start(self):
         """Start the monitoring threads."""
         self.running = True
-        self.thread.start()
         self.price_update_thread.start()
         logging.info("OrderMonitor started.")
 
     def stop(self):
         """Stop the monitoring threads."""
         self.running = False
-        self.thread.join()
         self.price_update_thread.join()
         logging.info("OrderMonitor stopped.")
 
-    def run(self):
-        """Main loop to check orders."""
-        while self.running:
-            time.sleep(self.check_exit_interval)
 
     def update_prices_continuously(self):
         """Continuously update prices for active orders."""
@@ -80,12 +72,13 @@ class OrderMonitor:
         orders = self.order_manager.list_orders(OrderStatus.HOLDING)
         for order in orders:
             self.update_order_price_and_profit(order['symbol'], order)
+            
+            # check exit conditions
+            self.evaluate_order(order['symbol'], order)
 
     def update_order_price_and_profit(self, symbol: str, order: dict):
-        """Update the current price and profit for a given order."""
         try:
             ohlcv = get_curr_ohlcv(symbol)
-            
             current_price = get_curr_close(ohlcv)
             if current_price is None:
                 logging.error(f"CURRENT PRICE IS NONE! updating price for {symbol}")
@@ -97,7 +90,6 @@ class OrderMonitor:
             else:
                 order['profit'] = 0
 
-            # Update highest MA if necessary
             current_ma = get_curr_ma(ohlcv, ma_type=order['maType'], period=order['period'])
             if 'highestMA' not in order or current_ma > order['highestMA']:
                 order['highestMA'] = current_ma
@@ -119,35 +111,27 @@ class OrderMonitor:
         return exit_alerts
 
     def evaluate_order(self, symbol: str, order: dict):
-        """Evaluate an order to determine if it should be exited and return an alert if it should."""
         try:
             ohlcv = get_curr_ohlcv(symbol)
-            
-            # Fetch current price and MA
             current_price = get_curr_close(ohlcv)
-            
             if current_price is None:
                 logging.error(f"CURRENT PRICE IS NONE! evaluating order for {symbol}")
                 return None
 
             current_ma = get_curr_ma(ohlcv, ma_type=order['maType'], period=order['period'])
-            
             if current_ma is None:
                 logging.error(f"CURRENT MA IS NONE! evaluating order for {symbol}")
                 return None
 
-            # Update current price and profit in the order
             order['currentPrice'] = current_price
             if order['entryPrice'] != 0:
                 order['profit'] = ((current_price - order['entryPrice']) / order['entryPrice']) * 100
             else:
                 order['profit'] = 0
 
-            # Update highest MA if necessary
             if 'highestMA' not in order or not order['highestMA'] or current_ma > order['highestMA']:
                 order['highestMA'] = current_ma
 
-            # Determine if the order should be exited
             takeProfitReached = False
             take_profit_price = order['entryPrice'] * (1 + order['takeProfitPct'] / 100)
             if order['highestMA'] >= take_profit_price:
@@ -157,7 +141,6 @@ class OrderMonitor:
             if takeProfitReached:
                 if order['secondarySLPct'] <= 0:
                     exit_reason = "Auto-Sell (Take Profit) hit"
-
                 secondary_sl_value = order['highestMA'] * (1 - order['secondarySLPct'] / 100)
                 if current_ma <= secondary_sl_value:
                     exit_reason = "Secondary Stop Loss hit"
@@ -174,13 +157,11 @@ class OrderMonitor:
             if exit_reason:
                 order['exitReason'] = exit_reason
 
-                # Immediately mark trade as done on local file/db instead of waiting for notification to exit
                 if self.auto_remove_on_exit:
-                    order['status'] = OrderStatus.EXITED.value
-                
-                self.order_manager.update_order(symbol, order)
+                    self.order_manager.exit_order(symbol)
+                else:
+                    self.order_manager.update_order(symbol, order)
 
-                # Create notification data for frontend here and return it
                 exit_alert = {
                     'symbol': symbol,
                     'message': f"{exit_reason} for {symbol}. Current price: {order['currentPrice']:.2f}, Profit: {order['profit']:.2f}%, Highest MA: {order['highestMA']:.2f}",
@@ -192,5 +173,3 @@ class OrderMonitor:
         except Exception as e:
             logging.error(f"Error evaluating order for {symbol}: {str(e)}")
             return None
-
-

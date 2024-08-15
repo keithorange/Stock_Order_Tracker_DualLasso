@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Rocket, Settings, Bell, ChevronRight, X, Edit } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-} from "recharts";
+
 import "./styles.css";
 import Confetti from "react-confetti";
 import Chart from "react-apexcharts";
@@ -30,9 +21,6 @@ const getBackgroundColor = (profit, colorIntensity) => {
   }
 };
 
-
-const candlesToLoad = 420;
-const candlesToShow = 420;
 
 const StockOrderTracker = () => {
   const [activeTab, setActiveTab] = useState("newOrder");
@@ -153,20 +141,6 @@ const StockOrderTracker = () => {
   const winSoundRef = useRef(null);
   const lossSoundRef = useRef(null);
 
-  const createTestOrder = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/test-order", {
-        method: "POST",
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      await fetchOrders();
-      await fetchNotifications();
-    } catch (error) {
-      console.error("Failed to create test order:", error);
-    }
-  };
 
   useEffect(() => {
     fetchOrders();
@@ -261,7 +235,7 @@ const handleExitTrade = async (symbol) => {
     );
 
     // // Fetch updated orders and notifications
-    //await fetchOrders();
+    await fetchOrders();
     //await fetchNotifications();
 
     const order = orders.find((o) => o.symbol === symbol);
@@ -276,6 +250,44 @@ const handleExitTrade = async (symbol) => {
     }
   } catch (error) {
     console.error("Failed to exit trade:", error);
+  }
+};
+
+// Function to delete a single order by symbol
+const handleDeleteOrder = async (symbol) => {
+  try {
+    // Delete the order with the given symbol
+    const response = await fetch(`http://localhost:5000/api/orders/${symbol}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete the order with symbol: ${symbol}`);
+    }
+
+    // Fetch updated orders after deletion
+    await fetchOrders();
+  } catch (error) {
+    console.error("Failed to delete the order:", error);
+  }
+};
+
+// Function to delete all completed orders
+const handleDeleteAllCompletedOrders = async () => {
+  try {
+    // Delete all completed orders
+    const response = await fetch(`http://localhost:5000/api/orders/completed`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete all completed orders");
+    }
+
+    // Fetch updated orders after deletion
+    await fetchOrders();
+  } catch (error) {
+    console.error("Failed to delete all completed orders:", error);
   }
 };
 
@@ -310,14 +322,6 @@ const handleNotificationAction = async (symbol, action) => {
     setShowNotificationModal(false);
   }
 };
-  // useEffect(() => {
-  //   if (selectedOrderId) {
-  //     const order = orders.find((o) => o.symbol === selectedOrderId);
-  //     if (order) {
-  //       fetchCandleData(order.symbol);
-  //     }
-  //   }
-  // }, [selectedOrderId, orders]);
 
   const fetchCandleData = async (order) => {
     try {
@@ -806,6 +810,27 @@ const handleNotificationAction = async (symbol, action) => {
           )}
           {activeTab === "completedOrders" && (
             <div className="trade-list">
+              <button
+                style={{
+                  backgroundColor: '#f56565', // Red background
+                  color: '#fff',              // White text
+                  padding: '8px 12px',        // Padding
+                  border: 'none',             // No border
+                  borderRadius: '4px',        // Slightly rounded corners
+                  fontSize: '14px',           // Small text
+                  cursor: 'pointer',          // Pointer cursor on hover
+                  transition: 'background-color 0.2s', // Smooth color transition
+                  marginBottom: '15px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c53030'} // Darker red on hover
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f56565'} // Original red on hover out
+                onClick={handleDeleteAllCompletedOrders}
+              >
+                Delete All Completed Orders
+              </button>
+
+
+
               {completedOrders.length > 0 ? (
                 completedOrders.map((order) => (
                   <div
@@ -847,6 +872,15 @@ const handleNotificationAction = async (symbol, action) => {
                           }}
                         >
                           📊
+                        </button>
+                        <button
+                          className="w-full bg-red-500 hover:bg-red-600 transition-all duration-300 button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteOrder(order.symbol);
+                          }}
+                        >
+                          🗑️
                         </button>
                       </div>
                     )}
@@ -906,162 +940,7 @@ const handleNotificationAction = async (symbol, action) => {
             </div>
           )}
         </Modal>
-{/*
-          {showNotificationModal && currentNotification && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div
-                className="notification-popup p-8 rounded-lg shadow-2xl max-w-2xl w-full"
-                style={{
-                  backgroundColor: getBackgroundColor(
-                    orders.find((o) => o.symbol === currentNotification.symbol)?.profit,
-                    settings.colorIntensity
-                  ),
-                }}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-3xl font-extrabold text-white">
-                    Trade Alert
-                  </h2>
-                </div>
-                <div className="mb-4 text-center">
-                  <p className="text-2xl font-bold mb-2 text-white">
-                    {currentNotification.symbol}
-                  </p>
-                  <p className="text-lg mb-2 text-white">
-                    {currentNotification.message}
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Current Price: $
-                    {orders
-                      .find((o) => o.symbol === currentNotification.symbol)
-                      ?.currentPrice.toFixed(2)}
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Entry Price: $
-                    {orders
-                      .find((o) => o.symbol === currentNotification.symbol)
-                      ?.entryPrice.toFixed(2)}
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Exit Strategy:{" "}
-                    {orders
-                      .find((o) => o.symbol === currentNotification.symbol)
-                      ?.maType.toUpperCase()}
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Period:{" "}
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.period
-                    }
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Initial SL:{" "}
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.initialSL
-                    }{" "}
-                    (
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.initialSLPct
-                    }
-                    %)
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Secondary SL:{" "}
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.secondarySL
-                    }{" "}
-                    (
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.secondarySLPct
-                    }
-                    %)
-                  </p>
-                  <p className="text-md mb-1 text-white">
-                    Take Profit:{" "}
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.takeProfitPct
-                    }{" "}
-                    (
-                    {
-                      orders.find(
-                        (o) => o.symbol === currentNotification.symbol,
-                      )?.takeProfitPct
-                    }
-                    %)
-                  </p>
-                  <p
-                    className={`text-md mb-1 font-bold`}
-                    style={{
-                      color:
-                        orders.find(
-                          (o) => o.symbol === currentNotification.symbol,
-                        )?.profit >= 0
-                          ? "#16a34a"
-                          : "#dc2626",
-                    }}
-                  >
-                    Profit:{" "}
-                    {orders
-                      .find((o) => o.symbol === currentNotification.symbol)
-                      ?.profit.toFixed(2)}
-                    %
-                  </p>
-                </div>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() =>
-                      handleNotificationAction(
-                        currentNotification.symbol,
-                        "edit",
-                      )
-                    }
-                    style={{
-                      backgroundColor: "#f59e0b",
-                      color: "white",
-                      padding: "0.5rem 1rem",
-                      borderRadius: "0.5rem",
-                      fontWeight: "bold",
-                      fontSize: "1rem",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleNotificationAction(
-                        currentNotification.symbol,
-                        "exit",
-                      )
-                    }
-                    style={{
-                      backgroundColor: "#ef4444",
-                      color: "white",
-                      padding: "0.5rem 1rem",
-                      borderRadius: "0.5rem",
-                      fontWeight: "bold",
-                      fontSize: "1rem",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    Exit
-                  </button>
-                </div>
-              </div>
-            </div>
-          )} */}
+
 
           {showConfetti && <Confetti />}
           {showEmoji && (

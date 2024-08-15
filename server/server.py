@@ -13,11 +13,11 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-AUTO_REMOVE_ON_NEXT = False # TODO: fix glitch
-print("AUTO_REMOVE_ON_NEXT = ", AUTO_REMOVE_ON_NEXT)
+AUTO_REMOVE_ON_EXIT = True # TODO: fix glitch
+print("AUTO_REMOVE_ON_EXIT = ", AUTO_REMOVE_ON_EXIT)
 # Initialize OrderManager and OrderMonitor
 order_manager = OrderManager(strategy_name='MyStrategy')
-order_monitor = OrderMonitor(order_manager, check_exit_interval=10, price_update_interval=8, auto_remove_on_exit=AUTO_REMOVE_ON_NEXT) 
+order_monitor = OrderMonitor(order_manager, price_update_interval=10, auto_remove_on_exit=AUTO_REMOVE_ON_EXIT) 
 order_monitor.start()
 
 
@@ -56,10 +56,15 @@ def update_order_data(symbol, data, is_new_order=False):
 
     # Set other fields
     if is_new_order:
-        data['profit'] = 0
         data['status'] = 'HOLDING'
         data['entryDatetime'] = datetime.now().isoformat()
         data['exitDatetime'] = None
+        
+        data["currentPrice"] = 0
+        data["highestMA"] = 0
+        data['profit'] = 0
+        data["exitReason"] = ""
+
 
     # Update the order
     order_manager.update_order(symbol, data)
@@ -87,7 +92,7 @@ def handle_orders():
         all_orders = order_manager.list_orders()
         return jsonify(all_orders)
 
-@app.route('/api/orders/<symbol>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+@app.route('/api/orders/<symbol>', methods=['GET', 'PUT', 'DELETE'])
 def handle_order(symbol):
     if request.method == 'OPTIONS':
         return '', 204
@@ -107,10 +112,20 @@ def handle_order(symbol):
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
     elif request.method == 'DELETE':
-        if not order_manager.get_order(symbol):
-            return jsonify({"error": "Order not found"}), 404
-        order_manager.cancel_order(symbol)
-        return jsonify({"message": "Order canceled successfully"}), 200
+        order_manager.delete_order(symbol)
+        return jsonify({"message": "Order deleted successfully"}), 200
+    
+    else:
+        return jsonify({"error": "Wrong method!"}), 500
+
+
+@app.route('/api/orders/completed', methods=['DELETE'])
+def delete_all_completed_orders():
+    try:
+        order_manager.delete_all_completed_orders()
+        return jsonify({"message": "All completed orders deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/orders/<symbol>/exit', methods=['POST'])
 def exit_order(symbol):
@@ -118,9 +133,8 @@ def exit_order(symbol):
     if not order:
         return jsonify({"error": "Order not found"}), 404
 
-    order['status'] = OrderStatus.EXITED.value
-    order['exitDatetime'] = datetime.now().isoformat()
-    order_manager.update_order(symbol, order)
+    order_manager.exit_order(symbol)
+    
     return jsonify({"message": "Order exited successfully"}), 200
 
 @app.route('/api/stock/<symbol>', methods=['GET'])
