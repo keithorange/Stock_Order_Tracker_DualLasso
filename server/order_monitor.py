@@ -47,6 +47,7 @@ class OrderMonitor:
         self.price_update_thread = threading.Thread(target=self.update_prices_continuously, daemon=True)
         self.running = False
         logging.basicConfig(level=logging.INFO)
+        
 
     def start(self):
         """Start the monitoring threads."""

@@ -21,6 +21,19 @@ order_monitor = OrderMonitor(order_manager, price_update_interval=10, auto_remov
 order_monitor.start()
 
 
+@app.route('/api/config/auto-remove', methods=['POST'])
+def set_auto_remove_on_exit():
+    global AUTO_REMOVE_ON_EXIT
+    data = request.json
+    if 'autoRemoveOnExit' not in data:
+        return jsonify({"error": "'autoRemoveOnExit' is required"}), 400
+    
+    AUTO_REMOVE_ON_EXIT = data['autoRemoveOnExit']
+    order_monitor.auto_remove_on_exit = AUTO_REMOVE_ON_EXIT
+    
+    return jsonify({"message": f"AUTO_REMOVE_ON_EXIT set to {AUTO_REMOVE_ON_EXIT}"}), 200
+
+
 
 def get_current_price(symbol):
     """Helper function to fetch the most recent price from Yahoo Finance."""

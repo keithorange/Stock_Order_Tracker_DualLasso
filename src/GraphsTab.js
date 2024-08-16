@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -187,7 +187,43 @@ const GraphsTab = ({ completedOrders = testCompletedOrders }) => {
       ...runningProfitData.map((d) => Math.min(d.cumulativeProfitWithoutFee, d.cumulativeProfitWithFee))
     );
   };
-
+  const calculateTotalReturnPercentage = (orders, fee) => {
+    if (!orders || orders.length === 0) return [];
+    
+    // Assuming initial bankroll is $1000 and divided equally among trades
+    const initialInvestmentPerTrade = 1000 / orders.length;
+    
+    let cumulativeProfitWithoutFee = 0;
+    let cumulativeProfitWithFee = 0;
+    let totalInvestment = 0;
+    
+    // Reverse the orders to process from the last trade to the first
+    const reversedOrders = [...orders].reverse();
+    
+    return reversedOrders.map((order, index) => {
+      cumulativeProfitWithoutFee += order.profit;
+      cumulativeProfitWithFee += order.profit - fee;
+      totalInvestment = initialInvestmentPerTrade * (index + 1); // Total invested till current trade
+      
+      const returnPercentageWithoutFee = (cumulativeProfitWithoutFee / totalInvestment) * 100;
+      const returnPercentageWithFee = (cumulativeProfitWithFee / totalInvestment) * 100;
+      
+      return {
+        trade: index, // Adjust to reflect original trade index
+        totalReturnPercentageWithoutFee: parseFloat(returnPercentageWithoutFee.toFixed(2)),
+        totalReturnPercentageWithFee: parseFloat(returnPercentageWithFee.toFixed(2)),
+      };
+    });
+  };
+  
+  const sortedOrders = useMemo(() => {
+    return [...completedOrders].sort(
+      (a, b) => new Date(a.exitDatetime) - new Date(b.exitDatetime)
+    );
+  }, [completedOrders]);
+  
+  const totalReturnData = useMemo(() => calculateTotalReturnPercentage(sortedOrders, fee), [sortedOrders, fee]);
+  
   return (
     <div className="grid grid-cols-2 gap-4 bg-gray-800 p-4">
       <div className="col-span-2 bg-gray-900 p-4 rounded shadow">
@@ -270,6 +306,39 @@ const GraphsTab = ({ completedOrders = testCompletedOrders }) => {
                 stroke="#8884d8"
                 activeDot={{ r: 8 }}
                 name="Cumulative Profit with Fee"
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Total Return Percentage Graph */}
+      <div className="bg-gray-900 p-4 rounded shadow">
+        <h3 className="text-lg font-semibold mb-2 text-white">Total Return Percentage</h3>
+        <p className="text-sm text-gray-400 mb-4">
+          Shows the total return percentage for all trades combined, assuming equal division of bankroll.
+        </p>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={totalReturnData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <XAxis dataKey="trade" stroke="#ddd" />
+            <YAxis stroke="#ddd" />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="totalReturnPercentageWithoutFee"
+              stroke="#82ca9d"
+              activeDot={{ r: 8 }}
+              name="Return Percentage without Fee"
+            />
+            {fee > 0 && (
+              <Line
+                type="monotone"
+                dataKey="totalReturnPercentageWithFee"
+                stroke="#8884d8"
+                activeDot={{ r: 8 }}
+                name="Return Percentage with Fee"
               />
             )}
           </LineChart>
