@@ -156,11 +156,10 @@ class OrderMonitor:
 
             if exit_reason:
                 order['exitReason'] = exit_reason
+                self.order_manager.update_order(symbol, order)
 
                 if self.auto_remove_on_exit:
                     self.order_manager.exit_order(symbol)
-                else:
-                    self.order_manager.update_order(symbol, order)
 
                 exit_alert = {
                     'symbol': symbol,
