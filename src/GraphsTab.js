@@ -197,10 +197,8 @@ const GraphsTab = ({ completedOrders = testCompletedOrders }) => {
     let cumulativeProfitWithFee = 0;
     let totalInvestment = 0;
     
-    // Reverse the orders to process from the last trade to the first
-    const reversedOrders = [...orders].reverse();
     
-    return reversedOrders.map((order, index) => {
+    return orders.map((order, index) => {
       cumulativeProfitWithoutFee += order.profit;
       cumulativeProfitWithFee += order.profit - fee;
       totalInvestment = initialInvestmentPerTrade * (index + 1); // Total invested till current trade
